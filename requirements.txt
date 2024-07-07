@@ -1,0 +1,17 @@
+langchain_community
+langchain-openai
+langchainhub
+langchain
+tiktoken
+python-dotenv
+autopep8
+ipython
+ipykernel
+beautifulsoup4
+pymilvus
+langchain_milvus
+sqlalchemy
+fastapi
+streamlit
+sqlalchemy-utils
+psycopg2
