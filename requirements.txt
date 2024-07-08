@@ -15,3 +15,4 @@ fastapi
 streamlit
 sqlalchemy-utils
 psycopg2
+pypdf
