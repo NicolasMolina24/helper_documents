@@ -1,8 +1,10 @@
 from fastapi import FastAPI
 from rag_service.database import engine
-from rag_service.routers  import memory, document
+from rag_service.routers  import memory, document, rag
 from rag_service import models
+import dotenv
 
+dotenv.load_dotenv()
 # create tables
 models.Base.metadata.create_all(bind=engine)
 
@@ -13,4 +15,5 @@ app = FastAPI(
 )
 
 app.include_router(memory.router)
-app. include_router(document.router)
+app.include_router(document.router)
+app.include_router(rag.router)
