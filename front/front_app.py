@@ -1,10 +1,7 @@
-import time
-import random
 import requests
 import pandas as pd
 import streamlit as st
 from pathlib import Path
-from httpx import request
 from pypdf import PdfReader
 from langchain_openai import OpenAIEmbeddings
 from langchain_core.documents import Document
