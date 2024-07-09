@@ -8,12 +8,12 @@ from langchain_openai import ChatOpenAI
 # 1. Define the model for the agent
 class RouterQuery(BaseModel):
     """Route the user among the different services"""
-    route: Literal["vector_storage", "memory", "None"] = Field(
+    route: Literal["Vector_storage", "Memory", "Generate"] = Field(
         description="""Given a user query, route the user among the different services
-        The services are: "vector_storage or memory"""
+        The services are: Vector_storage, Memory, Generate"""
     )
 
-def runnables_route_question(question):
+def runnables_route_question(memory_context, vector_storage_context, question):
     """Route the question to web search, vectorstore or memory
     
     Returns:
@@ -28,8 +28,17 @@ def runnables_route_question(question):
     structured_llm_router = llm.with_structured_output(RouterQuery)
     # 4. Create the prompt
     system_prompt = f"""
-    You are an expert at routing a user question, Use the vectorstore to answer 
-    questions or the memory for retrieve information about our conversation history."
+    You are an expert at routing a user question among Vector_storage, Memory or Generate,
+    based on the next contexts:
+
+    MEMORY CONTEXT:
+    {memory_context}
+    END MEMORY CONTEXT.
+
+    VECTOR_STORAGE CONTEXT:
+    {vector_storage_context}
+    END VECTOR_STORAGE CONTEXT.  
+
     """
     
     route_prompt = ChatPromptTemplate.from_messages(
