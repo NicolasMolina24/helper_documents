@@ -3,7 +3,9 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy_utils import database_exists, create_database
 import os
+import dotenv
 
+dotenv.load_dotenv()
 
 POSTGRES_USER = os.getenv("POSTGRES_USER_DB")
 POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD_DB")
