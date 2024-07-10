@@ -26,4 +26,4 @@ RUN pip install pymilvus
 
 EXPOSE 8080
 RUN pip install pymilvus
-ENTRYPOINT ["uvicorn", "app.app", "--reload"]
+ENTRYPOINT ["uvicorn", "app:app", "--reload"]
