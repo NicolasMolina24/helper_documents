@@ -1,4 +1,7 @@
-FROM python:3.12-slim-bookworm
+FROM ubuntu:22.04
+
+# Actualizar el sistema y luego instalar Python
+RUN apt-get update && apt-get install -y python3 python3-pip
 
 RUN mkdir -p /myapp/rag_service
 
@@ -18,8 +21,9 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pip install -r /myapp/requirements.txt
+# re install pymilvus to avoid error
+RUN pip install pymilvus
 
-
-EXPOSE 8000
-
+EXPOSE 8080
+RUN pip install pymilvus
 ENTRYPOINT ["uvicorn", "app.app", "--reload"]
