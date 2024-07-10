@@ -7,6 +7,10 @@ from langchain_openai import OpenAIEmbeddings
 from langchain_core.documents import Document
 from langchain_milvus.vectorstores import Milvus
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 
 def register_memory(human_msg, ia_msg, uri_service):
@@ -261,6 +265,8 @@ def main(uri_service, uri_milvus):
 
 if __name__ == "__main__":
     # change this variables to a config file
-    uri_service = "http://127.0.0.1:8000/"
+    uri_service = "https://localhost:8000/"
+    #uri_service = f"{os.getenv("BACKEND_HOST")}:{os.getenv("BACKED_PORT")}/"
     uri_milvus = "milvus_demo.db"
+    #uri_milvus = os.getenv("MILVUS_URI")
     main(uri_service, uri_milvus)
