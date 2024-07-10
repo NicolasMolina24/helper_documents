@@ -20,7 +20,7 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-RUN pip install -r /myapp/requirements.txt
+RUN pip install -r requirements.txt
 # re install pymilvus to avoid error
 RUN pip install pymilvus
 
