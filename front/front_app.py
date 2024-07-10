@@ -266,7 +266,7 @@ def main(uri_service, uri_milvus):
 if __name__ == "__main__":
     # change this variables to a config file
     # uri_service = "https://localhost:8080/" 
-    uri_service = f"http://{os.getenv("BACKEND_HOST")}:{os.getenv("BACKED_PORT")}/"
+    uri_service = f"http://{os.getenv('BACKEND_HOST')}:{os.getenv('BACKED_PORT')}/"
     # uri_milvus = "/myapp/milvus_demo.db"
     uri_milvus = os.getenv("MILVUS_URI")
     main(uri_service, uri_milvus)
