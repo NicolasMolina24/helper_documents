@@ -1,9 +1,9 @@
 from sqlalchemy.orm import Session
-from rag_service.crud import rag_crud
+from crud import rag_crud
 from fastapi import APIRouter, Depends
-from rag_service.rag import generic_rag
-from rag_service.database import get_db
-from rag_service.rag import router as rag_router
+from rag import generic_rag
+from database import get_db
+from rag import router as rag_router
 
 
 router = APIRouter(prefix="/rag", tags=["Rag"])
@@ -45,4 +45,13 @@ def get_context_memory(docs_ids: str, query: str, db: Session = Depends(get_db))
     # Get RAG output
     rag_out = generic_rag.runnable_conext(
         context=vector_storage_context, question=query)
-    return {rag_out: rag_out.content}
+    return {'rag_out': rag_out.content}
+
+
+@router.get("/rag_default")
+def get_answer(context: str, query: str):
+    """Get the response from the RAG model based on the default context"""
+    # Get RAG output
+    rag_out = generic_rag.runnable_conext(
+        context=context, question=query)
+    return {'rag_out': rag_out.content}

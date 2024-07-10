@@ -1,9 +1,9 @@
 import pandas as pd
 from fastapi import Depends
 from sqlalchemy.orm import Session
-from rag_service.database import get_db
-from rag_service.crud import memory_crud, document_crud
-from rag_service.rag import vectorstorage
+from database import get_db
+from crud import memory_crud, document_crud
+from rag import vectorstorage
 
 def get_memory_dict(memory_object):
     """Get the memory object as a dictionary.

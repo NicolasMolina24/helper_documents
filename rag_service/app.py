@@ -1,7 +1,7 @@
 from fastapi import FastAPI
-from rag_service.database import engine
-from rag_service.routers  import memory, document, rag
-from rag_service import models
+from database import engine
+from routers  import memory, document, rag
+import models
 import dotenv
 
 dotenv.load_dotenv()
