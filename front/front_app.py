@@ -5,7 +5,10 @@ from pathlib import Path
 from pypdf import PdfReader
 from langchain_openai import OpenAIEmbeddings
 from langchain_core.documents import Document
-from langchain_milvus.vectorstores import Milvus
+from pathlib import Path
+
+# from langchain_milvus.vectorstores import Milvus
+from langchain_chroma import Chroma
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from dotenv import load_dotenv
 import os
@@ -15,18 +18,19 @@ load_dotenv()
 
 def register_memory(human_msg, ia_msg, uri_service):
     """Register the conversation in the database
-    
+
     Args:
         human_msg (str): Human message
         ia_msg (str): IA message
         uri_service (str): URI of the service
-    
+
     Returns:
         dict: Response of the service"""
     # load the endpoint from the service
     uri_service += "memory/"
     # create the data to send
     data = {"human_msg": human_msg, "ia_msg": ia_msg}
+    print(" Esta es la data ingest: ", data)
     # send the data to the service
     response_post = requests.post(
         uri_service, json=data, timeout=10
@@ -36,14 +40,14 @@ def register_memory(human_msg, ia_msg, uri_service):
 
 def register_document(name, uri_vs, file_type, collection_name, uri_service):
     """Register the document in the database
-    
+
     Args:
         name (str): Name of the document
         uri_vs (str): URI of the vector store
         file_type (str): Type of the file
         collection_name (str): Name of the collection
         uri_service (str): URI of the service
-    
+
     Returns:
         dict: Response of the service"""
     # load the endpoint from the service
@@ -68,10 +72,10 @@ def register_document(name, uri_vs, file_type, collection_name, uri_service):
 
 def get_documents(uri_service):
     """Get the documents in the database
-    
+
     Args:
         uri_service (str): URI of the service
-    
+
     Returns:
         dict: Response of the service"""
     # load the endpoint from the service
@@ -87,12 +91,22 @@ def get_documents(uri_service):
     return response_get.json()
 
 
+def set_documents_session(uri_service):
+    documents_in_db = get_documents(uri_service)
+    documents_in_db = pd.DataFrame(documents_in_db)
+    if not documents_in_db.empty:
+        # ids to query the retriever
+        st.session_state.documents_to_search_in = documents_in_db["id"].tolist()
+        # names of the documents in the database
+        st.session_state.documents_names_in_db = documents_in_db["name"].tolist()
+
+
 def pdf_to_docs(doc):
     """Convert a PDF to a list of documents
-    
+
     Args:
         doc (file): PDF file
-    
+
     Returns:
         list: List of documents"""
     list_docs = []
@@ -118,7 +132,7 @@ def pdf_to_docs(doc):
 
 def create_collection(uri, collection_name, docs, embeddings):
     """Create a collection in Milvus
-    
+
     Args:
         uri (str): URI of the Milvus
         collection_name (str): Name of the collection
@@ -126,21 +140,23 @@ def create_collection(uri, collection_name, docs, embeddings):
         embeddings (Embeddings): Embeddings object
     """
     print("Creating collection", collection_name)
-    Milvus.from_documents(
-        documents=docs,
-        embedding=embeddings,
-        connection_args={
-            "uri": uri,
-        },
-        collection_name=collection_name,
-        drop_old=True,  # Drop the old Milvus collection if it exists
+    # Milvus.from_documents(
+    #     documents=docs,
+    #     embedding=embeddings,
+    #     connection_args={
+    #         "uri": uri,
+    #     },
+    #     collection_name=collection_name,
+    #     drop_old=True,  # Drop the old Milvus collection if it exists
+    # )
+    Chroma.from_documents(
+        docs, embeddings, persist_directory=uri, collection_name=collection_name
     )
-    
 
 
 def load_docs(docs, uri_vs, uri_service, documents_in_bd):
     """Load the documents in the database
-    
+
     Args:
         docs (list): List of documents
         uri_vs (str): URI of the Milvus
@@ -160,7 +176,7 @@ def load_docs(docs, uri_vs, uri_service, documents_in_bd):
         # Get chunks for the document
         chunks_pdf = pdf_to_docs(doc)
         # create a collection for the document
-        create_collection(uri_vs, doc_name, chunks_pdf, OpenAIEmbeddings())
+        create_collection(uri_vs, collection_name, chunks_pdf, OpenAIEmbeddings())
         # register the document in the service
         register_document(doc_name, uri_vs, doc.type, collection_name, uri_service)
         st.success(f"Document {doc.name} loaded successfully", icon="✅")
@@ -169,23 +185,28 @@ def load_docs(docs, uri_vs, uri_service, documents_in_bd):
 # Streamed response emulator
 def response_generator(uri_service, question):
     """Generate a response from the service
-    
+
     Args:
         uri_service (str): URI of the service
         question (str): Question to ask
-    
+
     Returns:
         dict: Response of the service"""
     # load the endpoint from the service
-    uri_service += "rag_response/"
+    uri_service += "rag/rag_response"
     # create the data to send
-    data = {"docs_ids": st.session_state.documents_to_search_in, "question": question}
+    ids_search = st.session_state.documents_to_search_in
+    ids_search = list(map(str,ids_search))
+    params = {
+        "docs_ids": ",".join(ids_search),
+        "question": question,
+    }
     # send the data to the service
-    response_post = requests.post(
-        uri_service, json=data, timeout=10
+    response_post = requests.get(
+        uri_service, params=params, timeout=10
     )  # Timeout after 10 seconds
-    return response_post.json()
-
+    rag_out = response_post.json()
+    return rag_out["rag_out"]
 
 
 def main(uri_service, uri_milvus):
@@ -199,15 +220,23 @@ def main(uri_service, uri_milvus):
         page_title="Chat with your docs", page_icon=":green_book:", layout="wide"
     )
     st.title("DocChat App")
-    st.header("Welcome DocChat, the best wey to talk with your docs")
+    st.header(f"Welcome DocChat, the best wey to talk with your docs 📚🤖")
 
     # Initialize cat history
     if "messages" not in st.session_state:
         st.session_state.messages = []
-    if "documents_to_search_in" not in st.session_state:
+    if ("documents_to_search_in" not in st.session_state) or (
+        "documents_names_in_db" not in st.session_state
+    ):
         st.session_state.documents_to_search_in = []
-    if "documents_names_in_db" not in st.session_state:
         st.session_state.documents_names_in_db = []
+        set_documents_session(uri_service)
+        print(
+            "documents_to_search_in: ",
+            st.session_state.documents_to_search_in,
+            "documents_names_in_db: ",
+            st.session_state.documents_names_in_db
+            )
 
     # Display chat messages from history on app rerun
     for n, message in enumerate(st.session_state.messages):
@@ -230,11 +259,14 @@ def main(uri_service, uri_milvus):
 
         # Display assistant response in chat message container
         with st.chat_message("assistant"):
-            response = st.write_stream(response_generator(uri_service, prompt))
+            # stream response
+            # response = st.write_stream(response_generator(uri_service, prompt))
+            response_rag = response_generator(uri_service, prompt)
+            st.write(response_rag)
         # Add assistant response to chat history
-        st.session_state.messages.append({"role": "assistant", "content": response})
+        st.session_state.messages.append({"role": "assistant", "content": response_rag})
         # Register the conversation in the database
-        register_memory(prompt, response, uri_service)
+        register_memory(prompt, response_rag, uri_service)
 
     with st.sidebar:
         st.write("This is the sidebar")
@@ -245,15 +277,9 @@ def main(uri_service, uri_milvus):
         if docs and st.button("Load docs"):
             with st.spinner("Loading docs"):
 
-                documents_in_db = get_documents(uri_service)
-                documents_in_db = pd.DataFrame(documents_in_db)
+                # load session state variables
+                set_documents_session(uri_service)
 
-                if not documents_in_db.empty:
-                    # ids to query the retriever
-                    st.session_state.documents_to_search_in = documents_in_db["id"].tolist()
-                    # names of the documents in the database
-                    st.session_state.documents_names_in_db = documents_in_db["name"].tolist()
- 
                 # load the documents
                 load_docs(
                     docs=docs,
@@ -265,8 +291,10 @@ def main(uri_service, uri_milvus):
 
 if __name__ == "__main__":
     # change this variables to a config file
-    # uri_service = "https://localhost:8080/" 
-    uri_service = f"http://{os.getenv("BACKEND_HOST")}:{os.getenv("BACKED_PORT")}/"
+    uri_service = "http://localhost:8000/"
+    # uri_service = f"http://{os.getenv("BACKEND_HOST")}:{os.getenv("BACKED_PORT")}/"
     # uri_milvus = "/myapp/milvus_demo.db"
     uri_milvus = os.getenv("MILVUS_URI")
+    # get the file loc
+    uri_milvus = str(Path(uri_milvus).resolve())
     main(uri_service, uri_milvus)
