@@ -1,10 +1,8 @@
 from sqlalchemy.orm import Session
-from rag_service import models
-from rag_service.schemas import document_schema
+import models
+from schemas import document_schema
 from typing import List
 
-# def get_memory(db: Session, user_id: int):
-#     return db.query(memory.Memory).filter(memory.Memory.id == user_id).first()
 
 def get_document_by_name(db: Session, name: str) -> models.Document:
     """Get a document by name from the database.

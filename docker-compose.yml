@@ -1,0 +1,40 @@
+services:
+  postgres_rag:
+    container_name: "postgres_rag"
+    image: postgres:16-alpine3.20
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "1234"
+  back_docchat:
+    container_name: "back_docchat"
+    build:
+      context: .
+      dockerfile: rag_service/Dockerfile
+    volumes:
+      - ./rag_service:/myapp/rag_service
+      - shared-data:/myapp
+    ports:
+      - "8000:8000"
+    links:
+      - postgres_rag
+    depends_on:
+      - postgres_rag
+  front_container:
+    container_name: "front_container"
+    build:
+      context: .
+      dockerfile: front/Dockerfile
+    ports:
+      - "8501:8501"
+    links:
+      - back_docchat
+    depends_on:
+      - back_docchat
+      - postgres_rag
+    volumes:
+      - ./front:/myapp/front
+      - shared-data:/myapp
+volumes:
+  shared-data:

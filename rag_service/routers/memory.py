@@ -1,9 +1,9 @@
 from typing import List
 from fastapi import APIRouter, status, Depends
 from sqlalchemy.orm import Session
-from rag_service.database import get_db
-from rag_service.schemas import memory_schema
-from rag_service.crud import memory_crud
+from database import get_db
+from schemas import memory_schema
+from crud import memory_crud
 
 router = APIRouter(prefix="/memory", tags=["Memory"])
 

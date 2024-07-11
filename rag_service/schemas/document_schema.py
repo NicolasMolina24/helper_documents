@@ -4,6 +4,9 @@ from datetime import datetime
 # base class
 class DocumentBase(BaseModel):
     name: str
+    uri: str
+    type: str
+    collection_name: str
 
 # write data
 class DocumentCreate(DocumentBase):

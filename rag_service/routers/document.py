@@ -1,9 +1,9 @@
 from typing import List
 from fastapi import APIRouter, HTTPException, status, Depends
 from sqlalchemy.orm import Session
-from rag_service.database import get_db
-from rag_service.schemas import document_schema
-from rag_service.crud import document_crud
+from database import get_db
+from schemas import document_schema
+from crud import document_crud
 
 router = APIRouter(prefix="/document", tags=["Document"])
 

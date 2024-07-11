@@ -1,5 +1,5 @@
 from datetime import datetime
-from rag_service.database import Base
+from database import Base
 from sqlalchemy import Column, Integer, String, DateTime
 
 class Memory(Base):
@@ -16,6 +16,9 @@ class Document(Base):
 
     id = Column(Integer, primary_key=True, nullable=False, index=True)
     name = Column(String)
+    uri = Column(String)
+    type = Column(String)
+    collection_name = Column(String)
     created_at = Column(DateTime, default=datetime.now)
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now) 
 

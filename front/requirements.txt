@@ -1,0 +1,11 @@
+langchain_community
+langchain-openai
+langchain
+python-dotenv
+pymilvus
+langchain_milvus
+streamlit
+pypdf
+pandas
+langchain-chroma
+chromadb 
