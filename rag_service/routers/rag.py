@@ -17,8 +17,11 @@ def get_rag_route(
 ):
     """Get the response from the RAG model"""
     memory_context = rag_crud.get_context_memory(db, limit=5)
-    vector_storage_context = rag_crud.get_context_docs(
-        docs_ids=docs_ids, query=question, db=db, limit=5)
+    if docs_ids != "":
+        vector_storage_context = rag_crud.get_context_docs(
+            docs_ids=docs_ids, query=question, db=db, limit=5)
+    else:
+        vector_storage_context = "There is not vector storage context"
 
     routed = rag_router.runnables_route_question(
         memory_context=memory_context,
@@ -26,14 +29,17 @@ def get_rag_route(
         question=question)
 
     if routed.route == "Vector_storage":
+        print("routed to vector storage")
         rag_out = generic_rag.runnable_conext(
             context=vector_storage_context, question=question)
     elif routed.route == "Memory":
+        print("routed to memory")
         rag_out = generic_rag.runnable_conext(
             context=memory_context, question=question)
     else:
+        print("routed to default generation")
         rag_out = generic_rag.runnable_generic(question)
-    return rag_out
+    return {'rag_out': rag_out.content}
 
 
 @router.get("/rag_from_docs")
