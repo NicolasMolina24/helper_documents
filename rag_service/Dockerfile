@@ -24,6 +24,6 @@ RUN pip install -r /myapp/requirements.txt
 # re install pymilvus to avoid error
 RUN pip install pymilvus
 
-EXPOSE 8080
+EXPOSE 8000
 RUN pip install pymilvus
 ENTRYPOINT ["uvicorn", "app.app", "--reload"]

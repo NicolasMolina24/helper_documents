@@ -16,7 +16,7 @@ services:
       - ./rag_service:/myapp/rag_service
       - shared-data:/myapp
     ports:
-      - "8080:8080"
+      - "8000:8000"
     links:
       - postgres_rag
     depends_on:
