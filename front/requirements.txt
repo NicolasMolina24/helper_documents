@@ -7,3 +7,5 @@ langchain_milvus
 streamlit
 pypdf
 pandas
+langchain-chroma
+chromadb 

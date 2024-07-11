@@ -12,3 +12,5 @@ fastapi
 sqlalchemy-utils
 psycopg2
 pypdf
+langchain-chroma
+chromadb 
