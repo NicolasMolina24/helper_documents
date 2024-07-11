@@ -14,14 +14,14 @@ class RouterQuery(BaseModel):
     )
 
 def runnables_route_question(memory_context, vector_storage_context, question):
-    """Route the question to web search, vectorstore or memory
+    """Route the question to generate, vectorstore or memory
     
     Returns:
         str: Next node to call"""
 
     # 2. Create the LLM chat
     llm = ChatOpenAI(
-        model="gpt-3.5-turbo",
+        model="gpt-4o",
         temperature=0
     )
     # 3. Bound the tool and structure the output
@@ -29,7 +29,9 @@ def runnables_route_question(memory_context, vector_storage_context, question):
     # 4. Create the prompt
     system_prompt = f"""
     You are an expert at routing a user question among Vector_storage, Memory or Generate,
-    based on the next contexts:
+    based on the next contexts, if the memory context does not answer the question, 
+    switch to the vector storage context, if neither of the two contexts resolves 
+    the question it directs the question to 'Generate':
 
     MEMORY CONTEXT:
     {memory_context}
