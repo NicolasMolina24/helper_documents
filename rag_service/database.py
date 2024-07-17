@@ -5,7 +5,7 @@ from sqlalchemy_utils import database_exists, create_database
 import os
 import dotenv
 
-dotenv.load_dotenv()
+dotenv.load_dotenv(override=True)
 
 POSTGRES_USER = os.getenv("POSTGRES_USER_DB")
 POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD_DB")

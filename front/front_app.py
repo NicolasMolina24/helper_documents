@@ -13,7 +13,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from dotenv import load_dotenv
 import os
 
-load_dotenv()
+load_dotenv(override=True)
 
 
 def register_memory(human_msg, ia_msg, uri_service):
@@ -220,7 +220,7 @@ def main(uri_service, uri_milvus):
         page_title="Chat with your docs", page_icon=":green_book:", layout="wide"
     )
     st.title("DocChat App")
-    st.header(f"Welcome DocChat, the best wey to talk with your docs 📚🤖")
+    st.header(f"Welcome DocChat, the best way to talk with your docs 📚🤖")
 
     # Initialize cat history
     if "messages" not in st.session_state:
